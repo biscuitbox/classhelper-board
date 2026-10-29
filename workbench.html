@@ -150,7 +150,7 @@ nav :focus-visible{outline-color:#FFD400}
 //  │   const App app = { &quot;지뢰찾기&quot;, &quot;심심할 때 한 판&quot;, C_MINE, icon,  │
 //  │                     start, update, touch, stop,                │
 //  │                     nullptr,   // BOOT 버튼 (안 쓰면 nullptr)   │
-//  │                     false,     // true = 화면 자동 어둡게 안 함   │
+//  │                     false,     // true = 이 앱에서는 절전 안 함   │
 //  │                     true };    // true = 완성 (false = 회색 칸)   │
 //  │                                                                │
 //  │ 화면 규칙                                                       │
@@ -190,7 +190,7 @@ struct App {
   void (*touch)(uint8_t ev, int x, int y);
   void (*stop)();
   void (*button)();                          // 뒷면 BOOT 버튼 짧게 (없으면 nullptr)
-  bool keepAwake;                            // true = 화면 자동 어둡게 안 함
+  bool keepAwake;                            // true = 이 앱에서는 자동 절전 안 함
   bool ready;                                // false = 첫 화면에 회색 &quot;다음 시간에&quot;
 };
 
@@ -218,11 +218,11 @@ static inline uint16_t rgb(uint8_t r, uint8_t g, uint8_t b) { return lcd.color56
 //  (설정 화면에서 바꾸는 값. 앱에서도 읽을 수 있어요: Sys::cfg.vol 등)
 namespace Sys {
   struct Settings {
-    uint8_t vol = 2, bright = 1, dimIdx = 1, flip = 0, startApp = 0;
+    uint8_t vol = 2, bright = 1, sleepIdx = 1, flip = 0, startApp = 0;
   } cfg;
   static const uint8_t  VOL_GAIN[4]   = {0, 70, 150, 255};
   static const uint8_t  BRIGHT_VAL[3] = {45, 130, 255};
-  static const uint32_t DIM_MS[4]     = {60000, 180000, 600000, 0};   // 0 = 안 함
+  static const uint32_t SLEEP_MS[4]   = {180000, 600000, 1800000, 0}; // 자동 절전 3·10·30분, 0 = 안 함
   static volatile bool  touching = false;   // 지금 손가락이 화면에 닿아 있는지
   static int            battery  = -1;      // 배터리 남은 양 % (-1 = 아직 모름)
 }
@@ -1047,7 +1047,7 @@ const App app = {
   &quot;지뢰찾기&quot;, &quot;쉬는 시간에 한 판&quot;, C_MINE, icon,
   start, update, touch, stop,
   nullptr,   // BOOT 버튼: 안 씀
-  false,     // 화면 자동 어둡게: 함
+  false,     // 자동 절전: 함
   true       // 완성!
 };
 
@@ -1134,7 +1134,7 @@ const App app = {
   &quot;소음 신호등&quot;, &quot;교실 소리를 색으로 보여요&quot;, C_NOISE, icon,
   start, update, touch, stop,
   nullptr,   // BOOT 버튼 (안 쓰면 nullptr)
-  false,     // true = 화면 자동 어둡게 안 함
+  false,     // true = 이 앱에서는 자동 절전 안 함
   false      // ← 완성되면 true 로!
 };
 
@@ -1513,15 +1513,15 @@ const App app = {
 - 파일 전체 코드를 한 번에 줘.
 
 [만들 것 — 수업용 PPT 프레젠터]
-보드는 블루투스로 노트북과 연결되고, 노트북은 보드를 무선 키보드로 알아봐.
+보드는 블루투스로 PC와 연결되고, PC는 보드를 무선 키보드로 알아봐.
 키는 ble_hid.h 의 함수로 보내:
   Hid::key(KEY_RIGHT_ARROW)            키 하나 누르고 떼기
   Hid::combo(KEY_LEFT_SHIFT, KEY_F5)   두 키 조합
-  Hid::connected()                     노트북과 연결됐으면 true
+  Hid::connected()                     PC와 연결됐으면 true
   Hid::name()                          보드의 블루투스 이름 (예: ClassHelper-01)
 
 - 아직 연결되지 않았으면(Hid::connected() 가 false) 화면 가운데에
-  &quot;노트북 설정 → 블루투스 → 장치 추가 → (Hid::name())&quot; 안내를 크게 보여 주고,
+  &quot;PC 설정 → 블루투스 → 장치 추가 → (Hid::name())&quot; 안내를 크게 보여 주고,
   연결되는 순간 단추 화면으로 바꿔 줘.
 
 - 화면 대부분을 큰 [이전] [다음] 단추로. 이전 = Hid::key(KEY_LEFT_ARROW), 다음 = Hid::key(KEY_RIGHT_ARROW).
@@ -1550,7 +1550,7 @@ const App app = {
 //   - 화면 240x320, 왼쪽 위 (0,0)~(43,29) 는 🏠 자리 → start() 에서 drawHomeButton()
 //   - 다른 파일(ClassHelper.ino, helper.h 등)은 고치지 않기
 //   - 키 보내기: Hid::key(KEY_RIGHT_ARROW) 등 (ble_hid.h 맨 위 사용법)
-//   - 노트북과는 블루투스로 연결 (config.h 의 BT_NAME). 연결됐는지는 Hid::connected()
+//   - PC와는 블루투스로 연결 (config.h 의 BT_NAME). 연결됐는지는 Hid::connected()
 // =====================================================================
 #pragma once
 #include &quot;helper.h&quot;
@@ -1588,7 +1588,7 @@ const App app = {
   &quot;프레젠터&quot;, &quot;PPT 넘기기·포인터·타이머&quot;, C_PRES, icon,
   start, update, touch, stop,
   nullptr,   // BOOT 버튼 (안 쓰면 nullptr)
-  false,     // true = 화면 자동 어둡게 안 함
+  false,     // true = 이 앱에서는 자동 절전 안 함
   false      // ← 완성되면 true 로!
 };
 
@@ -1614,7 +1614,7 @@ app_presenter.h 전체 코드를 다시 줘.</code></pre></div><span class="step
 app_presenter.h 전체 코드를 다시 줘.</code></pre></div><div class="codewrap dim"><div class="chrome"><i></i><i></i><i></i><span>ClassHelper/app_presenter.h</span></div><div class="codehead"><span>완성 코드 — app_presenter.h (막혔을 때 탭에 통째로)</span><button class="copy" data-t="c17">복사</button></div><pre id="c17"><code>// =====================================================================
 //  app_presenter.h  —  🎤 수업 프레젠터  (3차시)
 //
-//  노트북과 블루투스로 연결하면 보드가 &#x27;무선 키보드 + 마우스&#x27;가 됩니다.
+//  PC와 블루투스로 연결하면 보드가 &#x27;무선 키보드 + 마우스&#x27;가 됩니다.
 //  아래 4장(탭)을 화면 아래에서 골라 써요.
 //    ① 넘기기   : ◀ ▶, 슬라이드쇼 시작·끝, 번호로 가기
 //    ② 포인터   : 레이저·펜·지우개, 화면을 문지르면 마우스가 움직이는 터치패드
@@ -1623,7 +1623,7 @@ app_presenter.h 전체 코드를 다시 줘.</code></pre></div><div class="codew
 //  - 위쪽 [PPT]/[구글] 단추로 파워포인트 ↔ 구글 슬라이드 단축키를 바꿔요
 //  - 보드 뒷면 BOOT 단추 = 다음 장 (화면을 안 보고 넘길 때)
 //
-//  처음 한 번: 노트북 블루투스 설정 → 장치 추가 → config.h 의 BT_NAME(예: ClassHelper-01)
+//  처음 한 번: PC 블루투스 설정 → 장치 추가 → config.h 의 BT_NAME(예: ClassHelper-01)
 //  연결 전에는 ①~③ 장에 연결 방법이 보이고, 연결되면 저절로 단추가 나타납니다.
 //
 //  ✏️ 바이브코딩으로 바꿔 보기 좋은 곳
@@ -1779,8 +1779,8 @@ static void contentClear() { lcd.fillRect(0, 30, 240, 248, C_BG); nb = 0; }
 static void drawPair() {                       // 블루투스 연결 전 안내
   lcd.fillRoundRect(10, 40, 220, 228, 10, 0x18E3);
   lcd.drawRoundRect(10, 40, 220, 228, 10, 0x4A69);
-  text(&quot;노트북과 연결해 주세요&quot;, 120, 64, &amp;fonts::efontKR_16_b, C_WHITE);
-  text(&quot;1. 노트북 설정 → 블루투스&quot;, 24, 98, &amp;fonts::efontKR_14, C_WHITE, textdatum_t::middle_left);
+  text(&quot;PC와 연결해 주세요&quot;, 120, 64, &amp;fonts::efontKR_16_b, C_WHITE);
+  text(&quot;1. PC 설정 → 블루투스&quot;, 24, 98, &amp;fonts::efontKR_14, C_WHITE, textdatum_t::middle_left);
   text(&quot;2. 장치 추가 → Bluetooth&quot;, 24, 122, &amp;fonts::efontKR_14, C_WHITE, textdatum_t::middle_left);
   text(&quot;3. 이 이름을 고르기&quot;, 24, 146, &amp;fonts::efontKR_14, C_WHITE, textdatum_t::middle_left);
   lcd.fillRoundRect(24, 162, 192, 34, 8, C_BLACK);
