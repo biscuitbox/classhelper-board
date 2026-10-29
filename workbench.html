@@ -1920,7 +1920,6 @@ static void timerSet(uint32_t ms) {
 }
 
 static void sendAction(uint8_t a) {
-  Serial.printf(&quot;[발표] 단추 %u (%s)\n&quot;, a, google ? &quot;구글&quot; : &quot;PPT&quot;);
   switch (a) {
     // ① 넘기기
     case A_PREV:        Hid::key(KEY_LEFT_ARROW);  break;
