@@ -228,6 +228,7 @@ namespace Sys {
   static uint8_t        rot      = 0;       // 지금 화면 방향 (0~3, 0 = 기본 세로)
   static volatile bool  touching = false;   // 지금 손가락이 화면에 닿아 있는지
   static int            battery  = -1;      // 배터리 남은 양 % (-1 = 아직 모름)
+  static float          batteryV = 0;       // 배터리 전압 (V)
 }
 
 // ------------------------------ 화면 방향 ------------------------------
