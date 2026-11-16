@@ -9,5 +9,6 @@ ESP32-S3 2.8인치 터치 보드(LCDwiki ES3C28P) 교사 연수 3차시 자료�
 - 초보 가이드북: `playbook.html`
 - 강사용: `script.html`(진행 대본), `setup.html`(강사 준비)
 - 보드 코드: `downloads/`
+- 3D 프린팅 케이스: `downloads/ClassHelper_case.zip` (홈의 '케이스 만들기')
 
 강사 김시명 · 해연중학교 · 2026
